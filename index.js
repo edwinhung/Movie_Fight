@@ -28,14 +28,17 @@ const resultWrapper = document.querySelector(".results");
 
 const onInput = async (event) => {
   const movies = await fetchData(event.target.value);
-  const target = document.querySelector("#target");
+  resultWrapper.innerHTML = "";
+  dropdown.classList.add("is-active");
   for (let movie of movies) {
-    const div = document.createElement("div");
-    div.innerHTML = `
-        <img src="${movie.Poster}" />
-        <h1>${movie.Title}</h1>
+    const option = document.createElement("a");
+    const imgSrc = movie.Poster === "N/A" ? "" : movie.Poster;
+    option.classList.add("dropdown-item");
+    option.innerHTML = `
+        <img src="${imgSrc}" />
+        ${movie.Title}
     `;
-    target.append(div);
+    resultWrapper.append(option);
   }
 };
 input.addEventListener("input", debounce(onInput, 500));
