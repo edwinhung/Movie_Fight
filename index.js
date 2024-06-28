@@ -11,11 +11,24 @@ const fetchData = async (searchTerm) => {
   return response.data.Search;
 };
 
-const input = document.body.querySelector("input");
+const root = document.querySelector(".autocomplete");
+root.innerHTML = `
+    <label><b>Search for a Movie</b></label>
+    <input class="input" />
+    <div class="dropdown">
+        <div class="dropdown-menu">
+            <div class="dropdown-content results"></div>
+        </div>
+    </div>
+`;
+
+const input = document.querySelector("input");
+const dropdown = document.querySelector(".dropdown");
+const resultWrapper = document.querySelector(".results");
 
 const onInput = async (event) => {
   const movies = await fetchData(event.target.value);
-  const target = document.body.querySelector("#target");
+  const target = document.querySelector("#target");
   for (let movie of movies) {
     const div = document.createElement("div");
     div.innerHTML = `
