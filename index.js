@@ -1,14 +1,10 @@
-createAutocomplte({
-  root: document.querySelector(".autocomplete"),
+const autocompleteConfig = {
   renderOption(movie) {
     const imgSrc = movie.Poster === "N/A" ? "" : movie.Poster;
     return `
-        <img src="${imgSrc}" />
-        ${movie.Title} (${movie.Year})
-    `;
-  },
-  onOptionSelect(movie) {
-    onMovieSelect(movie);
+            <img src="${imgSrc}" />
+            ${movie.Title} (${movie.Year})
+        `;
   },
   inputValue(movie) {
     return movie.Title;
@@ -25,19 +21,68 @@ createAutocomplte({
     }
     return response.data.Search;
   },
+};
+
+createAutocomplte({
+  ...autocompleteConfig,
+  root: document.querySelector("#left-autocomplete"),
+  onOptionSelect(movie) {
+    document.querySelector(".tutorial").classList.add("is-hidden");
+    onMovieSelect(movie, document.querySelector("#left-summary"), "left");
+  },
 });
 
-const onMovieSelect = async (movie) => {
+createAutocomplte({
+  ...autocompleteConfig,
+  root: document.querySelector("#right-autocomplete"),
+  onOptionSelect(movie) {
+    document.querySelector(".tutorial").classList.add("is-hidden");
+    onMovieSelect(movie, document.querySelector("#right-summary"), "right");
+  },
+});
+
+let leftMovie;
+let rightMovie;
+
+const onMovieSelect = async (movie, summaryElement, side) => {
   const response = await axios.get("http://www.omdbapi.com/", {
     params: {
       apikey: OMDB_API,
       i: movie.imdbID,
     },
   });
-  document.querySelector("#summary").innerHTML = movieTemplate(response.data);
+  summaryElement.innerHTML = movieTemplate(response.data);
+
+  if (side === "left") {
+    leftMovie = movie;
+  } else {
+    rightMovie = movie;
+  }
+
+  if (leftMovie && rightMovie) {
+    runComparison();
+  }
 };
 
+const runComparison = () => {};
+
 const movieTemplate = (movieDetail) => {
+  const dollar = parseInt(
+    movieDetail.BoxOffice.replace(/\$/g, "").replace(/,/g, "")
+  );
+  const metaScore = parseInt(movieDetail.Metascore);
+  const imdbRating = parseFloat(movieDetail.imdbRating);
+  const imdbVotes = parseInt(movieDetail.imdbVotes.replace(/,/g, ""));
+  const awards = movieDetail.Awards.split(" ").reduce((acc, word) => {
+    const value = parseInt(word);
+    if (isNaN(word)) {
+      return acc;
+    } else {
+      return acc + value;
+    }
+  }, 0);
+  console.log(awards);
+
   return `
         <article class="media">
             <figure class="media-left">
